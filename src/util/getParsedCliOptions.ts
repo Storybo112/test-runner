@@ -3,10 +3,11 @@ import { CommanderError, program } from 'commander';
 
 type ParsedCliOptions = {
   options: CliOptions['runnerOptions'];
-  extraArgs: CliOptions['jestOptions'];
+  extraArgs: CliOptions['playwrightOptions'];
 };
 
 export const getParsedCliOptions = (): ParsedCliOptions => {
+  // TODO: check all options which do not work/exist in Playwright
   program
     .option(
       '-i, --index-json',
@@ -23,7 +24,7 @@ export const getParsedCliOptions = (): ParsedCliOptions => {
       'Directory where to load Storybook configurations from',
       '.storybook'
     )
-    .option('--watch', 'Watch files for changes and rerun tests related to changed files', false)
+    .option('--watch', 'Watch files for changes and rerun tests related to changed files')
     .option('--watchAll', 'Watch files for changes and rerun all tests when something changes')
     .option(
       '--browsers <browsers...>',
@@ -39,9 +40,9 @@ export const getParsedCliOptions = (): ParsedCliOptions => {
       '--maxWorkers <amount>',
       'Specifies the maximum number of workers the worker-pool will spawn for running tests'
     )
-    .option('--testTimeout <number>', 'This option sets the default timeouts of test cases')
-    .option('--no-cache', 'Disable the cache')
-    .option('--clearCache', 'Deletes the Jest cache directory and then exits without running tests')
+    // .option('--testTimeout <number>', 'This option sets the default timeouts of test cases')
+    // .option('--no-cache', 'Disable the cache')
+    // .option('--clearCache', 'Deletes the Jest cache directory and then exits without running tests')
     .option('--verbose', 'Display individual test results with the test suite hierarchy')
     .option(
       '-u, --updateSnapshot',

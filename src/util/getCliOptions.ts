@@ -1,7 +1,6 @@
 import { getParsedCliOptions } from './getParsedCliOptions';
-import type { BrowserType } from 'jest-playwright-preset';
 
-export type JestOptions = string[];
+export type PlaywrightOptions = string[];
 
 export type CliOptions = {
   runnerOptions: {
@@ -12,13 +11,13 @@ export type CliOptions = {
     coverage?: boolean;
     coverageDirectory?: string;
     junit?: boolean;
-    browsers?: BrowserType | BrowserType[];
+    browsers?: string | string[];
     failOnConsole?: boolean;
     includeTags?: string;
     excludeTags?: string;
     skipTags?: string;
   } & Record<string, string | boolean>;
-  jestOptions: JestOptions;
+  playwrightOptions: PlaywrightOptions;
 };
 
 type StorybookRunnerCommand = keyof CliOptions['runnerOptions'];
@@ -46,12 +45,21 @@ function copyOption<ObjType extends object, KeyType extends keyof ObjType>(
   obj[key] = value;
 }
 
+const getBackwardCompatibleKey = (key: string) => {
+  const optionsMap = {
+    watch: 'ui',
+    watchAll: 'ui',
+  } as Record<string, string>;
+
+  return optionsMap[key] ?? key;
+};
+
 export const getCliOptions = (): CliOptions => {
   const { options: allOptions, extraArgs } = getParsedCliOptions();
 
   const defaultOptions: CliOptions = {
     runnerOptions: {},
-    jestOptions: process.argv.splice(0, 2),
+    playwrightOptions: process.argv.splice(0, 2),
   };
 
   const finalOptions = Object.keys(allOptions).reduce((acc: CliOptions, _key: string) => {
@@ -61,12 +69,13 @@ export const getCliOptions = (): CliOptions => {
     if (STORYBOOK_RUNNER_COMMANDS.includes(key)) {
       copyOption(acc.runnerOptions, key, optionValue);
     } else {
+      let _key = getBackwardCompatibleKey(key);
       if (optionValue === true) {
-        acc.jestOptions.push(`--${key}`);
+        acc.playwrightOptions.push(`--${_key}`);
       } else if (optionValue === false) {
-        acc.jestOptions.push(`--no-${key}`);
+        acc.playwrightOptions.push(`--no-${_key}`);
       } else {
-        acc.jestOptions.push(`--${key}`, `${optionValue}`);
+        acc.playwrightOptions.push(`--${_key}`, `${optionValue}`);
       }
     }
 
@@ -74,7 +83,7 @@ export const getCliOptions = (): CliOptions => {
   }, defaultOptions);
 
   if (extraArgs.length) {
-    finalOptions.jestOptions.push(...extraArgs);
+    finalOptions.playwrightOptions.push(...extraArgs);
   }
 
   return finalOptions;

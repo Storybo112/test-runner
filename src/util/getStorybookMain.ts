@@ -7,12 +7,18 @@ export const storybookMainConfig = new Map<string, StorybookConfig>();
 
 export const getStorybookMain = (configDir = '.storybook') => {
   if (storybookMainConfig.has(configDir)) {
+    // console.log('cached main config!', storybookMainConfig.get(configDir));
     return storybookMainConfig.get(configDir) as StorybookConfig;
-  } else {
-    storybookMainConfig.set(configDir, serverRequire(join(resolve(configDir), 'main')));
   }
 
-  const mainConfig = storybookMainConfig.get(configDir);
+  // console.log('setting main config for the first time');
+  // console.trace('path: ', join(resolve(configDir), 'main'));
+  const mainConfig = serverRequire(join(resolve(configDir), 'main'));
+  // console.log('👉 mainConfig first: ', mainConfig);
+
+  storybookMainConfig.set(configDir, mainConfig);
+
+  // console.log('👉 mainConfig second: ', mainConfig);
 
   if (!mainConfig) {
     throw new Error(
